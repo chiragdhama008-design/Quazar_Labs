@@ -17,7 +17,7 @@ interface Star {
 
 export const StarfieldCanvas: React.FC<StarfieldCanvasProps> = ({
   isWarping = false,
-  density = 220,
+  density = 160,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -27,9 +27,15 @@ export const StarfieldCanvas: React.FC<StarfieldCanvasProps> = ({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    // Check prefers-reduced-motion
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
     let animationFrameId: number;
     let width = (canvas.width = window.innerWidth);
     let height = (canvas.height = window.innerHeight);
+
+    // Responsive density: fewer stars on mobile screens
+    const effectiveDensity = width < 768 ? Math.min(density, 80) : density;
 
     const handleResize = () => {
       if (!canvas) return;
@@ -38,71 +44,71 @@ export const StarfieldCanvas: React.FC<StarfieldCanvasProps> = ({
     };
     window.addEventListener('resize', handleResize);
 
-    // Mouse parallax tracking
+    // Subtle parallax tracking
     let targetMouseX = 0;
     let targetMouseY = 0;
     let mouseX = 0;
     let mouseY = 0;
 
     const handleMouseMove = (e: MouseEvent) => {
-      targetMouseX = (e.clientX - width / 2) * 0.05;
-      targetMouseY = (e.clientY - height / 2) * 0.05;
+      if (prefersReducedMotion) return;
+      targetMouseX = (e.clientX - width / 2) * 0.03;
+      targetMouseY = (e.clientY - height / 2) * 0.03;
     };
     window.addEventListener('mousemove', handleMouseMove);
 
-    // Colors: pure white, cosmic cyan, electric violet, stellar amber
-    const colors = ['#FFFFFF', '#E0F2FE', '#BAE6FD', '#7DD3FC', '#C4B5FD', '#DDD6FE'];
+    // Sophisticated star palette: pure white, ice blue, faint violet, subtle starlight amber
+    const colors = ['#FFFFFF', '#E2E8F0', '#BAE6FD', '#DDD6FE', '#FEF3C7'];
 
     // Generate stars
-    const stars: Star[] = Array.from({ length: density }, () => ({
+    const stars: Star[] = Array.from({ length: effectiveDensity }, () => ({
       x: (Math.random() - 0.5) * width * 2,
       y: (Math.random() - 0.5) * height * 2,
       z: Math.random() * 1000 + 1,
-      size: Math.random() * 1.5 + 0.5,
+      size: Math.random() * 1.2 + 0.4,
       color: colors[Math.floor(Math.random() * colors.length)],
-      twinkleSpeed: Math.random() * 0.02 + 0.005,
+      twinkleSpeed: Math.random() * 0.015 + 0.005,
       twinklePhase: Math.random() * Math.PI * 2,
     }));
 
-    // Floating nebulae dust clouds
+    // Soft celestial atmospheric clouds (very subtle, low opacity)
     const nebulae = [
-      { x: width * 0.2, y: height * 0.3, radius: 350, color: 'rgba(139, 92, 246, 0.04)' },
-      { x: width * 0.8, y: height * 0.7, radius: 450, color: 'rgba(34, 211, 238, 0.04)' },
-      { x: width * 0.5, y: height * 0.9, radius: 400, color: 'rgba(244, 63, 94, 0.03)' },
+      { x: width * 0.15, y: height * 0.25, radius: 450, color: 'rgba(124, 58, 237, 0.035)' },
+      { x: width * 0.85, y: height * 0.65, radius: 550, color: 'rgba(6, 182, 212, 0.035)' },
     ];
 
     let lastTime = performance.now();
 
     const render = (time: number) => {
-      const dt = (time - lastTime) / 1000;
+      const dt = Math.min((time - lastTime) / 1000, 0.1);
       lastTime = time;
 
       // Smooth mouse follow
       mouseX += (targetMouseX - mouseX) * 0.05;
       mouseY += (targetMouseY - mouseY) * 0.05;
 
-      ctx.fillStyle = '#050816';
+      ctx.fillStyle = '#070B16';
       ctx.fillRect(0, 0, width, height);
 
-      // Render ambient nebulae
+      // Render subtle celestial ambient glow
       nebulae.forEach(nebula => {
         const grad = ctx.createRadialGradient(
-          nebula.x - mouseX * 0.5,
-          nebula.y - mouseY * 0.5,
-          10,
-          nebula.x - mouseX * 0.5,
-          nebula.y - mouseY * 0.5,
+          nebula.x - mouseX * 0.3,
+          nebula.y - mouseY * 0.3,
+          20,
+          nebula.x - mouseX * 0.3,
+          nebula.y - mouseY * 0.3,
           nebula.radius
         );
         grad.addColorStop(0, nebula.color);
         grad.addColorStop(1, 'transparent');
         ctx.fillStyle = grad;
         ctx.beginPath();
-        ctx.arc(nebula.x - mouseX * 0.5, nebula.y - mouseY * 0.5, nebula.radius, 0, Math.PI * 2);
+        ctx.arc(nebula.x - mouseX * 0.3, nebula.y - mouseY * 0.3, nebula.radius, 0, Math.PI * 2);
         ctx.fill();
       });
 
-      const speed = isWarping ? 1800 * dt : 40 * dt;
+      const speed = isWarping ? 1400 * dt : (prefersReducedMotion ? 0 : 25 * dt);
       const cx = width / 2;
       const cy = height / 2;
 
@@ -116,33 +122,31 @@ export const StarfieldCanvas: React.FC<StarfieldCanvasProps> = ({
         }
 
         const k = 400 / star.z;
-        const px = star.x * k + cx - mouseX * (1000 - star.z) * 0.001;
-        const py = star.y * k + cy - mouseY * (1000 - star.z) * 0.001;
+        const px = star.x * k + cx - mouseX * (1000 - star.z) * 0.0008;
+        const py = star.y * k + cy - mouseY * (1000 - star.z) * 0.0008;
 
         if (px >= 0 && px < width && py >= 0 && py < height) {
           star.twinklePhase += star.twinkleSpeed;
           const alpha = isWarping
-            ? 1
-            : Math.max(0.2, (1 - star.z / 1000) * (0.6 + 0.4 * Math.sin(star.twinklePhase)));
+            ? 0.9
+            : Math.max(0.15, (1 - star.z / 1000) * (0.6 + 0.4 * Math.sin(star.twinklePhase)));
 
           if (isWarping) {
-            // Warp streak
-            const prevK = 400 / (star.z + speed * 4);
+            const prevK = 400 / (star.z + speed * 3);
             const prevPx = star.x * prevK + cx;
             const prevPy = star.y * prevK + cy;
 
             ctx.strokeStyle = star.color;
-            ctx.lineWidth = star.size * k * 1.5;
+            ctx.lineWidth = star.size * k * 1.2;
             ctx.beginPath();
             ctx.moveTo(prevPx, prevPy);
             ctx.lineTo(px, py);
             ctx.stroke();
           } else {
-            // Point star
             ctx.fillStyle = star.color;
             ctx.globalAlpha = alpha;
             ctx.beginPath();
-            ctx.arc(px, py, star.size * k * 0.8, 0, Math.PI * 2);
+            ctx.arc(px, py, star.size * k * 0.7, 0, Math.PI * 2);
             ctx.fill();
             ctx.globalAlpha = 1;
           }

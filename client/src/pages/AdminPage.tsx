@@ -3,7 +3,6 @@ import {
   Shield,
   Layers,
   BookOpen,
-  Calendar,
   Video,
   Settings,
   LogOut,
@@ -20,8 +19,12 @@ import {
   Compass,
   FileText,
   Tag,
-  Link as LinkIcon,
   Sparkles,
+  Activity,
+  Terminal,
+  Radio,
+  Clock,
+  ChevronRight,
 } from 'lucide-react';
 import { api } from '../services/api';
 import {
@@ -139,7 +142,7 @@ export const AdminPage: React.FC = () => {
     e.preventDefault();
     setLoginError(null);
     setLoginSubmitting(true);
-    soundManager.playTelemetryChirp(650, 0.05);
+    soundManager.playTelemetryChirp(650, 0.04);
 
     try {
       await api.login({ username: usernameInput, password: passwordInput });
@@ -148,7 +151,7 @@ export const AdminPage: React.FC = () => {
       loadAllAdminData();
     } catch (err: any) {
       setLoginError(err.message || 'Invalid administrative credentials.');
-      soundManager.playTelemetryChirp(350, 0.1);
+      soundManager.playTelemetryChirp(350, 0.08);
     } finally {
       setLoginSubmitting(false);
     }
@@ -158,7 +161,7 @@ export const AdminPage: React.FC = () => {
     try {
       await api.logout();
       setIsAuthenticated(false);
-      soundManager.playTelemetryChirp(500, 0.08);
+      soundManager.playTelemetryChirp(500, 0.06);
     } catch (err) {
       console.error('Logout error:', err);
     }
@@ -359,9 +362,11 @@ export const AdminPage: React.FC = () => {
   // Loading state during auth check
   if (authLoading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center space-y-4 bg-[#050816]">
+      <div className="min-h-screen flex flex-col items-center justify-center space-y-4 bg-[#070B16]">
         <div className="w-10 h-10 border-2 border-cosmic-cyan border-t-transparent rounded-full animate-spin" />
-        <p className="font-mono text-xs text-cosmic-cyan">Verifying Command Credentials...</p>
+        <p className="font-mono text-xs text-cosmic-cyan tracking-widest uppercase">
+          Verifying Dharma Command Credentials...
+        </p>
       </div>
     );
   }
@@ -371,10 +376,12 @@ export const AdminPage: React.FC = () => {
   // ==========================================
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-[#050816] relative z-10">
-        <div className="max-w-md w-full glass-panel rounded-3xl p-8 sm:p-10 border border-cosmic-cyan/30 shadow-glow-cyan/40 space-y-6">
+      <div className="min-h-screen flex items-center justify-center p-4 bg-[#070B16] relative z-10">
+        <div className="absolute inset-0 bg-grid-pattern opacity-10 pointer-events-none" />
+
+        <div className="max-w-md w-full glass-panel rounded-3xl p-8 sm:p-10 border border-cosmic-cyan/30 shadow-glow-cyan space-y-6 relative z-10">
           <div className="text-center space-y-2">
-            <div className="w-14 h-14 rounded-2xl bg-cosmic-card border border-cosmic-cyan/40 flex items-center justify-center mx-auto shadow-glow-cyan">
+            <div className="w-14 h-14 rounded-2xl bg-[#0D1424] border border-cosmic-cyan/40 flex items-center justify-center mx-auto shadow-glow-cyan/50">
               <Shield className="w-7 h-7 text-cosmic-cyan" />
             </div>
             <h1 className="text-2xl font-space font-extrabold text-white tracking-wider">
@@ -395,15 +402,15 @@ export const AdminPage: React.FC = () => {
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
               <label className="block text-xs font-mono uppercase text-slate-300 mb-1.5">
-                Commander Username
+                Commander Identifier (Username)
               </label>
               <input
                 type="text"
                 required
                 value={usernameInput}
                 onChange={e => setUsernameInput(e.target.value)}
-                placeholder="Enter admin identifier"
-                className="w-full bg-[#0A1024] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-cosmic-cyan font-mono"
+                placeholder="codersisland"
+                className="w-full bg-[#070B16] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-cosmic-cyan font-mono"
               />
             </div>
 
@@ -417,13 +424,14 @@ export const AdminPage: React.FC = () => {
                   required
                   value={passwordInput}
                   onChange={e => setPasswordInput(e.target.value)}
-                  placeholder="Enter secure password"
-                  className="w-full bg-[#0A1024] border border-white/10 rounded-xl pl-4 pr-11 py-3 text-sm text-white focus:outline-none focus:border-cosmic-cyan font-mono"
+                  placeholder="Enter command password"
+                  className="w-full bg-[#070B16] border border-white/10 rounded-xl pl-4 pr-11 py-3 text-sm text-white focus:outline-none focus:border-cosmic-cyan font-mono"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white cursor-pointer"
+                  aria-label="Toggle password visibility"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -433,36 +441,37 @@ export const AdminPage: React.FC = () => {
             <button
               type="submit"
               disabled={loginSubmitting}
-              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-cosmic-violet via-purple-600 to-cosmic-cyan text-white font-space font-bold text-sm shadow-glow-cyan hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-cosmic-violet via-purple-600 to-cosmic-cyan text-white font-space font-bold text-sm shadow-glow-cyan hover:opacity-95 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
             >
               {loginSubmitting ? (
                 <>
                   <RefreshCw className="w-4 h-4 animate-spin" />
-                  <span>Authorizing...</span>
+                  <span>Authorizing Station...</span>
                 </>
               ) : (
-                <span>Authenticate Station Access</span>
+                <span>Authenticate Mission Control</span>
               )}
             </button>
           </form>
 
-          <p className="text-[11px] font-mono text-center text-slate-500">
-            Protected endpoint &bull; Rate-limited authentication sequence
-          </p>
+          <div className="pt-2 border-t border-white/5 flex items-center justify-between text-[11px] font-mono text-slate-500">
+            <span>SECURE HTTPS &bull; HTTP-ONLY COOKIE</span>
+            <span>ROUTE: /dharma</span>
+          </div>
         </div>
       </div>
     );
   }
 
   // ==========================================
-  // AUTHENTICATED ADMIN DASHBOARD PORTAL
+  // AUTHENTICATED MISSION CONTROL INTERFACE
   // ==========================================
   return (
-    <div className="min-h-screen bg-[#050816] text-[#F8FAFC] pt-20 pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-8 relative z-10">
+    <div className="min-h-screen bg-[#070B16] text-[#F8FAFC] pt-24 pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-8 relative z-10">
       {/* Toast Notification */}
       {notification && (
         <div
-          className={`fixed bottom-6 right-6 z-50 px-5 py-3 rounded-xl border text-sm font-mono shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom duration-200 ${
+          className={`fixed bottom-6 right-6 z-50 px-5 py-3 rounded-xl border text-xs font-mono shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom duration-200 ${
             notification.type === 'success'
               ? 'bg-emerald-950/90 border-emerald-500/50 text-emerald-300'
               : 'bg-rose-950/90 border-rose-500/50 text-rose-300'
@@ -478,11 +487,11 @@ export const AdminPage: React.FC = () => {
       )}
 
       {/* Admin Station Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-white/10">
+      <div className="glass-panel rounded-2xl p-6 border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 text-xs font-mono text-cosmic-cyan mb-1">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span>COMMAND STATION ONLINE &bull; ROUTE: /dharma</span>
+            <span>COMMAND STATION ONLINE &bull; OPERATOR: codersisland &bull; /dharma</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-space font-extrabold text-white">
             Quazar Mission Control
@@ -493,9 +502,9 @@ export const AdminPage: React.FC = () => {
           <button
             onClick={() => {
               loadAllAdminData();
-              soundManager.playTelemetryChirp(700, 0.05);
+              soundManager.playTelemetryChirp(700, 0.04);
             }}
-            className="p-2 rounded-xl glass-hud text-slate-300 hover:text-white"
+            className="p-2.5 rounded-xl glass-hud text-slate-300 hover:text-white cursor-pointer"
             title="Refresh Station Data"
           >
             <RefreshCw className="w-4 h-4" />
@@ -503,7 +512,7 @@ export const AdminPage: React.FC = () => {
 
           <button
             onClick={handleLogout}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 hover:bg-rose-500/20 text-xs font-mono transition-colors"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 hover:bg-rose-500/20 text-xs font-mono transition-colors cursor-pointer"
           >
             <LogOut className="w-3.5 h-3.5" />
             <span>Lock Station (Logout)</span>
@@ -511,12 +520,12 @@ export const AdminPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Navigation Tabs */}
+      {/* Navigation Tabs Bar */}
       <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none border-b border-white/5">
         {[
           { id: 'dashboard', label: 'Telemetry Overview', icon: Layers },
           { id: 'paths', label: 'Learning Paths', icon: Compass },
-          { id: 'workshops', label: 'Workshops', icon: BookOpen },
+          { id: 'workshops', label: 'Workshops Manager', icon: BookOpen },
           { id: 'curriculum', label: 'Curriculum & Sessions', icon: Video },
           { id: 'settings', label: 'Station Settings', icon: Settings },
         ].map(tab => {
@@ -527,9 +536,9 @@ export const AdminPage: React.FC = () => {
               key={tab.id}
               onClick={() => {
                 setActiveTab(tab.id as any);
-                soundManager.playTelemetryChirp(600, 0.04);
+                soundManager.playTelemetryChirp(600, 0.03);
               }}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-space font-medium shrink-0 transition-all ${
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-mono tracking-wider uppercase shrink-0 transition-all cursor-pointer ${
                 isActive
                   ? 'bg-cosmic-cyan/20 border border-cosmic-cyan text-cosmic-cyan font-bold shadow-glow-cyan/20'
                   : 'glass-card text-slate-400 hover:text-white'
@@ -565,7 +574,7 @@ export const AdminPage: React.FC = () => {
                 {dashboardData.metrics.workshops.total}
               </p>
               <p className="text-xs font-mono text-slate-400">
-                {dashboardData.metrics.workshops.published} Published
+                {dashboardData.metrics.workshops.published} Published Active
               </p>
             </div>
 
@@ -574,7 +583,7 @@ export const AdminPage: React.FC = () => {
               <p className="text-3xl font-space font-bold text-cosmic-violet">
                 {dashboardData.metrics.weeks.total}
               </p>
-              <p className="text-xs font-mono text-slate-400">Across all workshops</p>
+              <p className="text-xs font-mono text-slate-400">Across all active paths</p>
             </div>
 
             <div className="glass-card rounded-2xl p-5 space-y-2 border border-white/5">
@@ -588,18 +597,18 @@ export const AdminPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Quick Publishing Workflow Guide */}
+          {/* Publishing Guide Callout */}
           <div className="glass-hud rounded-2xl p-6 border-cosmic-cyan/30 space-y-3">
             <h3 className="font-space font-bold text-base text-cosmic-cyan flex items-center gap-2">
               <CheckCircle className="w-4 h-4" />
-              <span>Weekly Session Publishing Telemetry</span>
+              <span>Session Publishing Protocol</span>
             </h3>
             <p className="text-sm text-slate-300 leading-relaxed">
               To publish a recorded YouTube session: Navigate to <strong>Curriculum & Sessions</strong>, select the target workshop and week, click <strong>Add Session</strong>, paste the YouTube URL (video ID is extracted automatically), provide markdown notes, and toggle status to <strong>PUBLISHED</strong>. It will immediately be live on the public portal.
             </p>
           </div>
 
-          {/* Quick Database & Demo Content Controls */}
+          {/* Restore Demo Data Controls */}
           <div className="glass-card rounded-2xl p-6 border border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
               <h4 className="font-space font-bold text-base text-white flex items-center gap-2">
@@ -613,7 +622,7 @@ export const AdminPage: React.FC = () => {
             <button
               onClick={handleSeedDemoData}
               disabled={isSeeding}
-              className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-cosmic-violet to-cosmic-cyan text-white text-xs font-mono font-bold hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center gap-2 shrink-0 shadow-glow-cyan/30"
+              className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-cosmic-violet to-cosmic-cyan text-white text-xs font-mono font-bold hover:opacity-95 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center gap-2 shrink-0 shadow-glow-cyan cursor-pointer"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isSeeding ? 'animate-spin' : ''}`} />
               <span>{isSeeding ? 'Restoring Curriculum...' : 'Restore Demo Curriculum'}</span>
@@ -644,7 +653,7 @@ export const AdminPage: React.FC = () => {
                 });
                 setIsPathModalOpen(true);
               }}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-cosmic-cyan/20 border border-cosmic-cyan text-cosmic-cyan hover:bg-cosmic-cyan/30 text-xs font-mono font-bold transition-all"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-cosmic-cyan/20 border border-cosmic-cyan text-cosmic-cyan hover:bg-cosmic-cyan/30 text-xs font-mono font-bold transition-all cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               <span>New Learning Path</span>
@@ -684,14 +693,14 @@ export const AdminPage: React.FC = () => {
                         setEditingPath(path);
                         setIsPathModalOpen(true);
                       }}
-                      className="p-1.5 rounded-lg glass-hud text-slate-300 hover:text-white"
+                      className="p-1.5 rounded-lg glass-hud text-slate-300 hover:text-white cursor-pointer"
                       title="Edit Path"
                     >
                       <Edit className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => handleDeletePath(path.id, path.title)}
-                      className="p-1.5 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500/20"
+                      className="p-1.5 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 cursor-pointer"
                       title="Delete Path"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -725,7 +734,7 @@ export const AdminPage: React.FC = () => {
                 });
                 setIsWorkshopModalOpen(true);
               }}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-cosmic-cyan/20 border border-cosmic-cyan text-cosmic-cyan hover:bg-cosmic-cyan/30 text-xs font-mono font-bold transition-all"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-cosmic-cyan/20 border border-cosmic-cyan text-cosmic-cyan hover:bg-cosmic-cyan/30 text-xs font-mono font-bold transition-all cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               <span>New Workshop</span>
@@ -764,7 +773,7 @@ export const AdminPage: React.FC = () => {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => handleDuplicateWorkshop(w.id)}
-                      className="p-1.5 rounded-lg glass-hud text-slate-300 hover:text-white"
+                      className="p-1.5 rounded-lg glass-hud text-slate-300 hover:text-white cursor-pointer"
                       title="Duplicate Workshop"
                     >
                       <Copy className="w-4 h-4" />
@@ -774,14 +783,14 @@ export const AdminPage: React.FC = () => {
                         setEditingWorkshop(w);
                         setIsWorkshopModalOpen(true);
                       }}
-                      className="p-1.5 rounded-lg glass-hud text-slate-300 hover:text-white"
+                      className="p-1.5 rounded-lg glass-hud text-slate-300 hover:text-white cursor-pointer"
                       title="Edit Workshop"
                     >
                       <Edit className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => handleDeleteWorkshop(w.id, w.title)}
-                      className="p-1.5 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500/20"
+                      className="p-1.5 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 cursor-pointer"
                       title="Delete Workshop"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -808,7 +817,7 @@ export const AdminPage: React.FC = () => {
               <select
                 value={selectedWorkshopId}
                 onChange={e => setSelectedWorkshopId(e.target.value)}
-                className="bg-[#0A1024] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white font-space focus:outline-none focus:border-cosmic-cyan"
+                className="bg-[#070B16] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white font-space focus:outline-none focus:border-cosmic-cyan"
               >
                 {workshops.map(w => (
                   <option key={w.id} value={w.id}>
@@ -830,7 +839,7 @@ export const AdminPage: React.FC = () => {
                 });
                 setIsWeekModalOpen(true);
               }}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-cosmic-violet/20 border border-cosmic-violet text-cosmic-violet hover:bg-cosmic-violet/30 text-xs font-mono font-bold transition-all shrink-0"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-cosmic-violet/20 border border-cosmic-violet text-cosmic-violet hover:bg-cosmic-violet/30 text-xs font-mono font-bold transition-all shrink-0 cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               <span>Add New Week</span>
@@ -840,7 +849,7 @@ export const AdminPage: React.FC = () => {
           {/* Weeks Accordion in Admin */}
           <div className="space-y-6">
             {selectedWorkshopWeeks.length === 0 ? (
-              <div className="glass-card rounded-2xl p-10 text-center text-slate-400">
+              <div className="glass-card rounded-2xl p-10 text-center text-slate-400 text-sm">
                 No weeks found for this workshop. Click &quot;Add New Week&quot; above to create Week 01.
               </div>
             ) : (
@@ -872,7 +881,7 @@ export const AdminPage: React.FC = () => {
                           setSessionPreviewId('');
                           setIsSessionModalOpen(true);
                         }}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cosmic-cyan/15 border border-cosmic-cyan/40 text-cosmic-cyan text-xs font-mono hover:bg-cosmic-cyan/25"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cosmic-cyan/15 border border-cosmic-cyan/40 text-cosmic-cyan text-xs font-mono hover:bg-cosmic-cyan/25 cursor-pointer"
                       >
                         <Plus className="w-3.5 h-3.5" />
                         <span>Add Session</span>
@@ -883,7 +892,7 @@ export const AdminPage: React.FC = () => {
                           setEditingWeek(week);
                           setIsWeekModalOpen(true);
                         }}
-                        className="p-1.5 rounded-lg glass-hud text-slate-300 hover:text-white"
+                        className="p-1.5 rounded-lg glass-hud text-slate-300 hover:text-white cursor-pointer"
                         title="Edit Week"
                       >
                         <Edit className="w-4 h-4" />
@@ -891,7 +900,7 @@ export const AdminPage: React.FC = () => {
 
                       <button
                         onClick={() => handleDeleteWeek(week.id, week.title)}
-                        className="p-1.5 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500/20"
+                        className="p-1.5 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 cursor-pointer"
                         title="Delete Week"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -903,7 +912,7 @@ export const AdminPage: React.FC = () => {
                   <div className="space-y-2">
                     {!week.sessions || week.sessions.length === 0 ? (
                       <p className="text-xs font-mono text-slate-500 italic">
-                        No sessions added to this week yet.
+                        No sessions added to this week yet. Click &quot;Add Session&quot; above to publish one.
                       </p>
                     ) : (
                       week.sessions.map(session => (
@@ -932,14 +941,14 @@ export const AdminPage: React.FC = () => {
                                 setSessionPreviewId(session.youtubeVideoId);
                                 setIsSessionModalOpen(true);
                               }}
-                              className="p-1.5 rounded-lg glass-hud text-slate-300 hover:text-white"
+                              className="p-1.5 rounded-lg glass-hud text-slate-300 hover:text-white cursor-pointer"
                               title="Edit Session"
                             >
                               <Edit className="w-4 h-4" />
                             </button>
                             <button
                               onClick={() => handleDeleteSession(session.id)}
-                              className="p-1.5 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500/20"
+                              className="p-1.5 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 cursor-pointer"
                               title="Delete Session"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -970,7 +979,7 @@ export const AdminPage: React.FC = () => {
                 type="text"
                 value={siteSettings.heroHeading}
                 onChange={e => setSiteSettings({ ...siteSettings, heroHeading: e.target.value })}
-                className="w-full bg-[#0A1024] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cosmic-cyan"
+                className="w-full bg-[#070B16] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cosmic-cyan"
               />
             </div>
 
@@ -980,7 +989,7 @@ export const AdminPage: React.FC = () => {
                 rows={2}
                 value={siteSettings.heroSubtitle}
                 onChange={e => setSiteSettings({ ...siteSettings, heroSubtitle: e.target.value })}
-                className="w-full bg-[#0A1024] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cosmic-cyan"
+                className="w-full bg-[#070B16] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cosmic-cyan"
               />
             </div>
 
@@ -990,7 +999,7 @@ export const AdminPage: React.FC = () => {
                 rows={4}
                 value={siteSettings.aboutText}
                 onChange={e => setSiteSettings({ ...siteSettings, aboutText: e.target.value })}
-                className="w-full bg-[#0A1024] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cosmic-cyan"
+                className="w-full bg-[#070B16] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cosmic-cyan"
               />
             </div>
 
@@ -1001,7 +1010,7 @@ export const AdminPage: React.FC = () => {
                   type="email"
                   value={siteSettings.contactEmail}
                   onChange={e => setSiteSettings({ ...siteSettings, contactEmail: e.target.value })}
-                  className="w-full bg-[#0A1024] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cosmic-cyan font-mono"
+                  className="w-full bg-[#070B16] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cosmic-cyan font-mono"
                 />
               </div>
 
@@ -1011,7 +1020,7 @@ export const AdminPage: React.FC = () => {
                   type="url"
                   value={siteSettings.githubUrl}
                   onChange={e => setSiteSettings({ ...siteSettings, githubUrl: e.target.value })}
-                  className="w-full bg-[#0A1024] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cosmic-cyan font-mono"
+                  className="w-full bg-[#070B16] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cosmic-cyan font-mono"
                 />
               </div>
             </div>
@@ -1023,7 +1032,7 @@ export const AdminPage: React.FC = () => {
                   type="url"
                   value={siteSettings.discordUrl}
                   onChange={e => setSiteSettings({ ...siteSettings, discordUrl: e.target.value })}
-                  className="w-full bg-[#0A1024] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cosmic-cyan font-mono"
+                  className="w-full bg-[#070B16] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cosmic-cyan font-mono"
                 />
               </div>
 
@@ -1033,7 +1042,7 @@ export const AdminPage: React.FC = () => {
                   type="url"
                   value={siteSettings.youtubeUrl}
                   onChange={e => setSiteSettings({ ...siteSettings, youtubeUrl: e.target.value })}
-                  className="w-full bg-[#0A1024] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cosmic-cyan font-mono"
+                  className="w-full bg-[#070B16] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cosmic-cyan font-mono"
                 />
               </div>
             </div>
@@ -1041,7 +1050,7 @@ export const AdminPage: React.FC = () => {
 
           <button
             type="submit"
-            className="px-6 py-3 rounded-xl bg-cosmic-cyan/20 border border-cosmic-cyan text-cosmic-cyan font-space font-bold text-sm hover:bg-cosmic-cyan/30 transition-all"
+            className="px-6 py-3 rounded-xl bg-cosmic-cyan/20 border border-cosmic-cyan text-cosmic-cyan font-space font-bold text-sm hover:bg-cosmic-cyan/30 transition-all cursor-pointer"
           >
             Save Public Station Settings
           </button>
@@ -1069,7 +1078,7 @@ export const AdminPage: React.FC = () => {
                 value={editingPath.title || ''}
                 onChange={e => setEditingPath({ ...editingPath, title: e.target.value })}
                 placeholder="e.g. Planet C++: Systems & Fundamentals"
-                className="w-full bg-[#0A1024] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cosmic-cyan"
+                className="w-full bg-[#070B16] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cosmic-cyan"
               />
             </div>
 
@@ -1081,7 +1090,7 @@ export const AdminPage: React.FC = () => {
                 value={editingPath.slug || ''}
                 onChange={e => setEditingPath({ ...editingPath, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') })}
                 placeholder="e.g. planet-cpp"
-                className="w-full bg-[#0A1024] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cosmic-cyan font-mono"
+                className="w-full bg-[#070B16] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cosmic-cyan font-mono"
               />
             </div>
 
@@ -1092,7 +1101,7 @@ export const AdminPage: React.FC = () => {
                 rows={3}
                 value={editingPath.description || ''}
                 onChange={e => setEditingPath({ ...editingPath, description: e.target.value })}
-                className="w-full bg-[#0A1024] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cosmic-cyan"
+                className="w-full bg-[#070B16] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cosmic-cyan"
               />
             </div>
 
@@ -1102,7 +1111,7 @@ export const AdminPage: React.FC = () => {
                 <select
                   value={editingPath.planetTheme || 'purple-gas-giant'}
                   onChange={e => setEditingPath({ ...editingPath, planetTheme: e.target.value })}
-                  className="w-full bg-[#0A1024] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cosmic-cyan"
+                  className="w-full bg-[#070B16] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cosmic-cyan"
                 >
                   <option value="blue-terrestrial">Blue Terrestrial (C++)</option>
                   <option value="purple-gas-giant">Purple Gas Giant (DSA)</option>
@@ -1118,7 +1127,7 @@ export const AdminPage: React.FC = () => {
                 <select
                   value={editingPath.publicationStatus || 'PUBLISHED'}
                   onChange={e => setEditingPath({ ...editingPath, publicationStatus: e.target.value as any })}
-                  className="w-full bg-[#0A1024] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cosmic-cyan"
+                  className="w-full bg-[#070B16] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cosmic-cyan"
                 >
                   <option value="PUBLISHED">PUBLISHED (Public)</option>
                   <option value="DRAFT">DRAFT (Hidden)</option>
@@ -1130,13 +1139,13 @@ export const AdminPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsPathModalOpen(false)}
-                className="px-4 py-2 rounded-xl text-slate-400 hover:text-white text-xs font-mono"
+                className="px-4 py-2 rounded-xl text-slate-400 hover:text-white text-xs font-mono cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-5 py-2.5 rounded-xl bg-cosmic-cyan/20 border border-cosmic-cyan text-cosmic-cyan text-xs font-mono font-bold hover:bg-cosmic-cyan/30"
+                className="px-5 py-2.5 rounded-xl bg-cosmic-cyan/20 border border-cosmic-cyan text-cosmic-cyan text-xs font-mono font-bold hover:bg-cosmic-cyan/30 cursor-pointer"
               >
                 Save Learning Path
               </button>
@@ -1164,7 +1173,7 @@ export const AdminPage: React.FC = () => {
                 required
                 value={editingWorkshop.learningPathId || ''}
                 onChange={e => setEditingWorkshop({ ...editingWorkshop, learningPathId: e.target.value })}
-                className="w-full bg-[#0A1024] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cosmic-cyan"
+                className="w-full bg-[#070B16] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cosmic-cyan"
               >
                 {paths.map(p => (
                   <option key={p.id} value={p.id}>
@@ -1182,7 +1191,7 @@ export const AdminPage: React.FC = () => {
                 value={editingWorkshop.title || ''}
                 onChange={e => setEditingWorkshop({ ...editingWorkshop, title: e.target.value })}
                 placeholder="e.g. Deep Space C++: Systems Programming From Scratch"
-                className="w-full bg-[#0A1024] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cosmic-cyan"
+                className="w-full bg-[#070B16] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cosmic-cyan"
               />
             </div>
 
@@ -1194,7 +1203,7 @@ export const AdminPage: React.FC = () => {
                 value={editingWorkshop.slug || ''}
                 onChange={e => setEditingWorkshop({ ...editingWorkshop, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') })}
                 placeholder="e.g. deep-space-cpp"
-                className="w-full bg-[#0A1024] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cosmic-cyan font-mono"
+                className="w-full bg-[#070B16] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cosmic-cyan font-mono"
               />
             </div>
 
@@ -1205,7 +1214,7 @@ export const AdminPage: React.FC = () => {
                 rows={3}
                 value={editingWorkshop.description || ''}
                 onChange={e => setEditingWorkshop({ ...editingWorkshop, description: e.target.value })}
-                className="w-full bg-[#0A1024] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cosmic-cyan"
+                className="w-full bg-[#070B16] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cosmic-cyan"
               />
             </div>
 
@@ -1215,7 +1224,7 @@ export const AdminPage: React.FC = () => {
                 <select
                   value={editingWorkshop.difficulty || 'Beginner'}
                   onChange={e => setEditingWorkshop({ ...editingWorkshop, difficulty: e.target.value as any })}
-                  className="w-full bg-[#0A1024] border border-white/10 rounded-xl px-3 py-2 text-xs text-white"
+                  className="w-full bg-[#070B16] border border-white/10 rounded-xl px-3 py-2 text-xs text-white"
                 >
                   <option value="Beginner">Beginner</option>
                   <option value="Intermediate">Intermediate</option>
@@ -1229,7 +1238,7 @@ export const AdminPage: React.FC = () => {
                   type="text"
                   value={editingWorkshop.estimatedDuration || '4 Weeks'}
                   onChange={e => setEditingWorkshop({ ...editingWorkshop, estimatedDuration: e.target.value })}
-                  className="w-full bg-[#0A1024] border border-white/10 rounded-xl px-3 py-2 text-xs text-white"
+                  className="w-full bg-[#070B16] border border-white/10 rounded-xl px-3 py-2 text-xs text-white"
                 />
               </div>
 
@@ -1238,7 +1247,7 @@ export const AdminPage: React.FC = () => {
                 <select
                   value={editingWorkshop.publicationStatus || 'PUBLISHED'}
                   onChange={e => setEditingWorkshop({ ...editingWorkshop, publicationStatus: e.target.value as any })}
-                  className="w-full bg-[#0A1024] border border-white/10 rounded-xl px-3 py-2 text-xs text-white"
+                  className="w-full bg-[#070B16] border border-white/10 rounded-xl px-3 py-2 text-xs text-white"
                 >
                   <option value="PUBLISHED">PUBLISHED</option>
                   <option value="DRAFT">DRAFT</option>
@@ -1250,13 +1259,13 @@ export const AdminPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsWorkshopModalOpen(false)}
-                className="px-4 py-2 rounded-xl text-slate-400 hover:text-white text-xs font-mono"
+                className="px-4 py-2 rounded-xl text-slate-400 hover:text-white text-xs font-mono cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-5 py-2.5 rounded-xl bg-cosmic-cyan/20 border border-cosmic-cyan text-cosmic-cyan text-xs font-mono font-bold hover:bg-cosmic-cyan/30"
+                className="px-5 py-2.5 rounded-xl bg-cosmic-cyan/20 border border-cosmic-cyan text-cosmic-cyan text-xs font-mono font-bold hover:bg-cosmic-cyan/30 cursor-pointer"
               >
                 Save Workshop
               </button>
@@ -1286,7 +1295,7 @@ export const AdminPage: React.FC = () => {
                 required
                 value={editingWeek.weekNumber || 1}
                 onChange={e => setEditingWeek({ ...editingWeek, weekNumber: parseInt(e.target.value, 10) || 1 })}
-                className="w-full bg-[#0A1024] border border-white/10 rounded-xl px-4 py-2 text-sm text-white"
+                className="w-full bg-[#070B16] border border-white/10 rounded-xl px-4 py-2 text-sm text-white"
               />
             </div>
 
@@ -1298,7 +1307,7 @@ export const AdminPage: React.FC = () => {
                 value={editingWeek.title || ''}
                 onChange={e => setEditingWeek({ ...editingWeek, title: e.target.value })}
                 placeholder="e.g. Week 01: Launch Sequence & Memory Architecture"
-                className="w-full bg-[#0A1024] border border-white/10 rounded-xl px-4 py-2 text-sm text-white"
+                className="w-full bg-[#070B16] border border-white/10 rounded-xl px-4 py-2 text-sm text-white"
               />
             </div>
 
@@ -1308,7 +1317,7 @@ export const AdminPage: React.FC = () => {
                 rows={2}
                 value={editingWeek.description || ''}
                 onChange={e => setEditingWeek({ ...editingWeek, description: e.target.value })}
-                className="w-full bg-[#0A1024] border border-white/10 rounded-xl px-4 py-2 text-sm text-white"
+                className="w-full bg-[#070B16] border border-white/10 rounded-xl px-4 py-2 text-sm text-white"
               />
             </div>
 
@@ -1316,13 +1325,13 @@ export const AdminPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsWeekModalOpen(false)}
-                className="px-4 py-2 rounded-xl text-slate-400 hover:text-white text-xs font-mono"
+                className="px-4 py-2 rounded-xl text-slate-400 hover:text-white text-xs font-mono cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 rounded-xl bg-cosmic-cyan/20 border border-cosmic-cyan text-cosmic-cyan text-xs font-mono font-bold"
+                className="px-4 py-2 rounded-xl bg-cosmic-cyan/20 border border-cosmic-cyan text-cosmic-cyan text-xs font-mono font-bold cursor-pointer"
               >
                 Save Week
               </button>
@@ -1352,7 +1361,7 @@ export const AdminPage: React.FC = () => {
                 value={editingSession.title || ''}
                 onChange={e => setEditingSession({ ...editingSession, title: e.target.value })}
                 placeholder="e.g. Session 01: The Spacecraft Computer & Compilation Pipeline"
-                className="w-full bg-[#0A1024] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cosmic-cyan"
+                className="w-full bg-[#070B16] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cosmic-cyan"
               />
             </div>
 
@@ -1378,7 +1387,7 @@ export const AdminPage: React.FC = () => {
                   }
                 }}
                 placeholder="https://www.youtube.com/watch?v=..."
-                className="w-full bg-[#0A1024] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-cosmic-cyan"
+                className="w-full bg-[#070B16] border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-cosmic-cyan"
               />
 
               {sessionPreviewId && (
@@ -1406,7 +1415,7 @@ export const AdminPage: React.FC = () => {
                   value={editingSession.duration || ''}
                   onChange={e => setEditingSession({ ...editingSession, duration: e.target.value })}
                   placeholder="e.g. 48m 15s"
-                  className="w-full bg-[#0A1024] border border-white/10 rounded-xl px-4 py-2 text-sm text-white font-mono"
+                  className="w-full bg-[#070B16] border border-white/10 rounded-xl px-4 py-2 text-sm text-white font-mono"
                 />
               </div>
 
@@ -1415,7 +1424,7 @@ export const AdminPage: React.FC = () => {
                 <select
                   value={editingSession.publicationStatus || 'PUBLISHED'}
                   onChange={e => setEditingSession({ ...editingSession, publicationStatus: e.target.value as any })}
-                  className="w-full bg-[#0A1024] border border-white/10 rounded-xl px-4 py-2 text-sm text-white"
+                  className="w-full bg-[#070B16] border border-white/10 rounded-xl px-4 py-2 text-sm text-white"
                 >
                   <option value="PUBLISHED">PUBLISHED (Live)</option>
                   <option value="DRAFT">DRAFT (Hidden)</option>
@@ -1432,7 +1441,7 @@ export const AdminPage: React.FC = () => {
                 value={editingSession.topics || ''}
                 onChange={e => setEditingSession({ ...editingSession, topics: e.target.value })}
                 placeholder="Compilers, Memory Layout, Preprocessor, Pointers"
-                className="w-full bg-[#0A1024] border border-white/10 rounded-xl px-4 py-2 text-sm text-white"
+                className="w-full bg-[#070B16] border border-white/10 rounded-xl px-4 py-2 text-sm text-white"
               />
             </div>
 
@@ -1445,7 +1454,7 @@ export const AdminPage: React.FC = () => {
                 value={editingSession.lessonNotes || ''}
                 onChange={e => setEditingSession({ ...editingSession, lessonNotes: e.target.value })}
                 placeholder="### Mission Briefing&#10;&#10;Key architecture points and code snippets..."
-                className="w-full bg-[#0A1024] border border-white/10 rounded-xl px-4 py-2 text-sm text-white font-mono"
+                className="w-full bg-[#070B16] border border-white/10 rounded-xl px-4 py-2 text-sm text-white font-mono"
               />
             </div>
 
@@ -1453,13 +1462,13 @@ export const AdminPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsSessionModalOpen(false)}
-                className="px-4 py-2 rounded-xl text-slate-400 hover:text-white text-xs font-mono"
+                className="px-4 py-2 rounded-xl text-slate-400 hover:text-white text-xs font-mono cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-5 py-2.5 rounded-xl bg-cosmic-cyan/20 border border-cosmic-cyan text-cosmic-cyan text-xs font-mono font-bold hover:bg-cosmic-cyan/30"
+                className="px-5 py-2.5 rounded-xl bg-cosmic-cyan/20 border border-cosmic-cyan text-cosmic-cyan text-xs font-mono font-bold hover:bg-cosmic-cyan/30 cursor-pointer"
               >
                 Save & Publish Session
               </button>

@@ -15,6 +15,8 @@ import {
   Menu,
   X,
   Sparkles,
+  Radio,
+  BookOpen,
 } from 'lucide-react';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
@@ -84,21 +86,23 @@ export const WorkshopDetailPage: React.FC = () => {
 
   const toggleWeek = (weekId: string) => {
     setOpenWeeks(prev => ({ ...prev, [weekId]: !prev[weekId] }));
-    soundManager.playTelemetryChirp(550, 0.04);
+    soundManager.playTelemetryChirp(550, 0.03);
   };
 
   const handleSelectSession = (session: Session) => {
     setSelectedSession(session);
     setMobileDrawerOpen(false);
-    soundManager.playTelemetryChirp(720, 0.05);
+    soundManager.playTelemetryChirp(720, 0.04);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   if (loading) {
     return (
       <div className="min-h-[85vh] flex flex-col items-center justify-center space-y-4">
-        <div className="w-12 h-12 rounded-full border-2 border-cosmic-cyan border-t-transparent animate-spin" />
-        <p className="font-mono text-sm text-cosmic-cyan">Loading Workshop Telemetry & Curriculum...</p>
+        <div className="w-10 h-10 rounded-full border-2 border-cosmic-cyan border-t-transparent animate-spin" />
+        <p className="font-mono text-xs text-cosmic-cyan tracking-widest uppercase animate-pulse">
+          Loading Workshop Telemetry & Curriculum...
+        </p>
       </div>
     );
   }
@@ -107,10 +111,10 @@ export const WorkshopDetailPage: React.FC = () => {
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center text-center p-4">
         <h2 className="text-2xl font-space font-bold text-white mb-2">Workshop Signal Lost</h2>
-        <p className="text-slate-400 mb-6">{error || 'This workshop is unavailable or private.'}</p>
+        <p className="text-slate-400 mb-6 text-sm">{error || 'This workshop is unavailable or private.'}</p>
         <Link
           to="/explore"
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-cosmic-cyan/15 text-cosmic-cyan border border-cosmic-cyan/30 text-sm font-space"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-cosmic-cyan/15 text-cosmic-cyan border border-cosmic-cyan/30 text-sm font-space font-semibold"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back to Explore Missions</span>
@@ -132,8 +136,13 @@ export const WorkshopDetailPage: React.FC = () => {
         .filter(Boolean)
     : [];
 
+  // Find the week corresponding to the selected session
+  const currentWeek = workshop.weeks?.find(w =>
+    w.sessions?.some(s => s.id === selectedSession?.id)
+  );
+
   return (
-    <div className="relative z-10 pt-24 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-8">
+    <div className="relative z-10 pt-28 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-8">
       {/* Top Breadcrumb & Mobile Drawer Trigger */}
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-2 text-xs font-mono text-slate-400 overflow-hidden text-ellipsis whitespace-nowrap">
@@ -153,25 +162,25 @@ export const WorkshopDetailPage: React.FC = () => {
         {/* Mobile Curriculum Trigger Button */}
         <button
           onClick={() => setMobileDrawerOpen(true)}
-          className="lg:hidden flex items-center gap-1.5 px-3 py-1.5 rounded-lg glass-hud border-cosmic-cyan/40 text-cosmic-cyan text-xs font-mono shrink-0"
+          className="lg:hidden flex items-center gap-1.5 px-3 py-1.5 rounded-lg glass-hud border-cosmic-cyan/40 text-cosmic-cyan text-xs font-mono shrink-0 cursor-pointer"
         >
           <Menu className="w-4 h-4" />
-          <span>Curriculum</span>
+          <span>View Curriculum ({allOrderedSessions.length})</span>
         </button>
       </div>
 
       {/* Workshop Header Card */}
       <div className="glass-panel rounded-2xl p-6 sm:p-8 border border-white/10 space-y-4">
         <div className="flex flex-wrap items-center gap-3">
-          <span className="text-xs font-mono px-2.5 py-1 rounded bg-cosmic-cyan/10 border border-cosmic-cyan/30 text-cosmic-cyan">
+          <span className="text-xs font-mono px-2.5 py-1 rounded bg-cosmic-cyan/10 border border-cosmic-cyan/30 text-cosmic-cyan font-semibold">
             {workshop.difficulty}
           </span>
           <span className="text-xs font-mono text-slate-400 flex items-center gap-1">
             <Clock className="w-3.5 h-3.5" />
             <span>{workshop.estimatedDuration || '4 Weeks'}</span>
           </span>
-          <span className="text-xs font-mono text-cosmic-violet">
-            {workshop.weeks?.length || 0} Weeks Curriculum
+          <span className="text-xs font-mono text-cosmic-violet font-semibold">
+            {workshop.weeks?.length || 0} Weeks Curriculum &bull; {allOrderedSessions.length} Sessions
           </span>
         </div>
 
@@ -190,23 +199,37 @@ export const WorkshopDetailPage: React.FC = () => {
         <div className="lg:col-span-8 space-y-8">
           {selectedSession ? (
             <div className="space-y-6">
-              {/* Responsive 16:9 YouTube Video Embed Frame */}
-              <div className="relative aspect-video w-full rounded-2xl overflow-hidden glass-panel border border-cosmic-cyan/30 shadow-glow-cyan/30 bg-black">
-                <iframe
-                  src={getEmbedUrl(selectedSession.youtubeVideoId)}
-                  title={selectedSession.title}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                  className="w-full h-full border-0"
-                />
+              {/* Responsive 16:9 YouTube Video Embed Frame with Transmission Indicator */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-xs font-mono text-slate-400 px-1">
+                  <div className="flex items-center gap-2 text-cosmic-cyan">
+                    <Radio className="w-3.5 h-3.5 animate-pulse text-cosmic-cyan" />
+                    <span className="tracking-widest uppercase">TRANSMISSION FEED &bull; ON-DEMAND</span>
+                  </div>
+                  {currentWeek && (
+                    <span className="text-slate-400">
+                      WEEK 0{currentWeek.weekNumber} &bull; SESSION {selectedSession.displayOrder}
+                    </span>
+                  )}
+                </div>
+
+                <div className="relative aspect-video w-full rounded-2xl overflow-hidden glass-panel border border-cosmic-cyan/30 shadow-glow-cyan bg-black">
+                  <iframe
+                    src={getEmbedUrl(selectedSession.youtubeVideoId)}
+                    title={selectedSession.title}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                    className="w-full h-full border-0"
+                  />
+                </div>
               </div>
 
               {/* Session Details Header */}
               <div className="glass-card rounded-2xl p-6 space-y-4">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
-                    <span className="px-2.5 py-1 rounded bg-cosmic-cyan/10 text-cosmic-cyan text-xs font-mono font-bold">
-                      CURRENT SESSION
+                    <span className="px-2.5 py-1 rounded bg-cosmic-cyan/15 text-cosmic-cyan text-xs font-mono font-bold tracking-wider">
+                      ACTIVE TRANSMISSION
                     </span>
                     {selectedSession.duration && (
                       <span className="text-xs font-mono text-slate-400">
@@ -285,7 +308,7 @@ export const WorkshopDetailPage: React.FC = () => {
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs font-mono text-cosmic-cyan uppercase">{res.resourceType}</p>
+                          <p className="text-[10px] font-mono text-cosmic-cyan uppercase">{res.resourceType}</p>
                           <p className="text-sm font-space font-bold text-white group-hover:text-cosmic-cyan transition-colors truncate">
                             {res.title}
                           </p>
@@ -304,7 +327,7 @@ export const WorkshopDetailPage: React.FC = () => {
                 {previousSession ? (
                   <button
                     onClick={() => handleSelectSession(previousSession)}
-                    className="flex items-center gap-2 px-4 py-3 rounded-xl glass-card text-left text-xs sm:text-sm hover:border-cosmic-cyan/40 transition-all group max-w-[48%]"
+                    className="flex items-center gap-2 px-4 py-3 rounded-xl glass-card text-left text-xs sm:text-sm hover:border-cosmic-cyan/40 transition-all group max-w-[48%] cursor-pointer"
                   >
                     <ChevronLeft className="w-5 h-5 text-cosmic-cyan shrink-0 group-hover:-translate-x-1 transition-transform" />
                     <div className="truncate">
@@ -319,7 +342,7 @@ export const WorkshopDetailPage: React.FC = () => {
                 {nextSession ? (
                   <button
                     onClick={() => handleSelectSession(nextSession)}
-                    className="flex items-center gap-2 px-4 py-3 rounded-xl glass-card text-right text-xs sm:text-sm hover:border-cosmic-cyan/40 transition-all group max-w-[48%] ml-auto"
+                    className="flex items-center gap-2 px-4 py-3 rounded-xl glass-card text-right text-xs sm:text-sm hover:border-cosmic-cyan/40 transition-all group max-w-[48%] ml-auto cursor-pointer"
                   >
                     <div className="truncate">
                       <p className="text-[10px] font-mono text-slate-400 uppercase">Next Session</p>
@@ -343,7 +366,7 @@ export const WorkshopDetailPage: React.FC = () => {
 
         {/* Desktop Curriculum Sidebar (4 cols) */}
         <div className="hidden lg:block lg:col-span-4 sticky top-28 space-y-4">
-          <div className="glass-panel rounded-2xl p-5 border border-white/10 space-y-4 max-h-[80vh] overflow-y-auto">
+          <div className="glass-panel rounded-2xl p-5 border border-white/10 space-y-4 max-h-[82vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-3 border-b border-white/10">
               <h3 className="font-space font-bold text-base text-white">Course Curriculum</h3>
               <span className="font-mono text-xs text-cosmic-cyan">
@@ -358,15 +381,15 @@ export const WorkshopDetailPage: React.FC = () => {
                 return (
                   <div
                     key={week.id}
-                    className="rounded-xl border border-white/5 bg-[#0A1024]/60 overflow-hidden"
+                    className="rounded-xl border border-white/5 bg-[#0D1424]/60 overflow-hidden"
                   >
                     {/* Week Header */}
                     <button
                       onClick={() => toggleWeek(week.id)}
-                      className="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-white/5 transition-colors"
+                      className="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-white/5 transition-colors cursor-pointer"
                     >
                       <div>
-                        <p className="text-xs font-mono text-cosmic-cyan uppercase">
+                        <p className="text-xs font-mono text-cosmic-cyan uppercase font-semibold">
                           Week 0{week.weekNumber}
                         </p>
                         <p className="text-sm font-space font-bold text-white leading-snug">
@@ -383,13 +406,13 @@ export const WorkshopDetailPage: React.FC = () => {
                     {/* Sessions List */}
                     {isOpen && week.sessions && week.sessions.length > 0 && (
                       <div className="px-2 pb-2 space-y-1">
-                        {week.sessions.map((session, sIdx) => {
+                        {week.sessions.map(session => {
                           const isCurrent = selectedSession?.id === session.id;
                           return (
                             <button
                               key={session.id}
                               onClick={() => handleSelectSession(session)}
-                              className={`w-full px-3 py-2.5 rounded-lg text-left text-xs flex items-center gap-2.5 transition-all ${
+                              className={`w-full px-3 py-2.5 rounded-lg text-left text-xs flex items-center gap-2.5 transition-all cursor-pointer ${
                                 isCurrent
                                   ? 'bg-cosmic-cyan/15 text-cosmic-cyan border border-cosmic-cyan/40 font-semibold shadow-glow-cyan/20'
                                   : 'text-slate-300 hover:text-white hover:bg-white/5'
@@ -437,7 +460,7 @@ export const WorkshopDetailPage: React.FC = () => {
               </button>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-4">
               {workshop.weeks?.map(week => (
                 <div key={week.id} className="space-y-2">
                   <p className="text-xs font-mono text-cosmic-cyan font-bold uppercase">
@@ -448,14 +471,19 @@ export const WorkshopDetailPage: React.FC = () => {
                       <button
                         key={session.id}
                         onClick={() => handleSelectSession(session)}
-                        className={`w-full p-3 rounded-xl text-left text-sm flex items-center gap-3 ${
+                        className={`w-full p-3 rounded-xl text-left text-sm flex items-center gap-3 cursor-pointer ${
                           selectedSession?.id === session.id
                             ? 'bg-cosmic-cyan/20 border border-cosmic-cyan text-cosmic-cyan font-bold'
                             : 'bg-white/5 text-slate-300 hover:bg-white/10'
                         }`}
                       >
                         <Play className="w-4 h-4 shrink-0 fill-current" />
-                        <span className="truncate">{session.title}</span>
+                        <span className="truncate flex-1">{session.title}</span>
+                        {session.duration && (
+                          <span className="text-[11px] font-mono text-slate-400 shrink-0">
+                            {session.duration}
+                          </span>
+                        )}
                       </button>
                     ))}
                   </div>

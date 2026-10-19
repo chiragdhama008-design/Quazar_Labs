@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Search, Filter, X, ArrowRight, BookOpen, Layers } from 'lucide-react';
+import { Search, Filter, X, ArrowRight, BookOpen, Layers, Sparkles, Clock } from 'lucide-react';
 import { api } from '../services/api';
 import { Workshop, LearningPath } from '../types';
 import { PlanetVisual } from '../components/space/PlanetVisual';
@@ -58,7 +58,7 @@ export const ExplorePage: React.FC = () => {
       }
     }
 
-    const timer = setTimeout(fetchFilteredWorkshops, 250);
+    const timer = setTimeout(fetchFilteredWorkshops, 200);
     return () => {
       active = false;
       clearTimeout(timer);
@@ -79,29 +79,29 @@ export const ExplorePage: React.FC = () => {
     setSelectedPath('');
     setSelectedDifficulty('');
     setSelectedSort('order');
-    soundManager.playTelemetryChirp(600, 0.05);
+    soundManager.playTelemetryChirp(600, 0.04);
   };
 
   const hasActiveFilters = Boolean(search.trim() || selectedPath || selectedDifficulty);
 
   return (
-    <div className="relative z-10 pt-28 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+    <div className="relative z-10 pt-28 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-10">
       {/* Header */}
-      <div className="space-y-4 mb-10 text-center sm:text-left">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cosmic-cyan/10 border border-cosmic-cyan/30 text-cosmic-cyan font-mono text-xs">
+      <div className="space-y-4 text-center sm:text-left">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cosmic-cyan/10 border border-cosmic-cyan/30 text-cosmic-cyan font-mono text-xs uppercase tracking-widest">
           <BookOpen className="w-3.5 h-3.5" />
-          <span>DEEP SPACE CURRICULUM EXPLORER</span>
+          <span>CURRICULUM EXPLORATION ARCHIVE</span>
         </div>
-        <h1 className="text-3xl sm:text-5xl font-space font-extrabold text-white">
+        <h1 className="text-3xl sm:text-5xl font-space font-extrabold text-white tracking-tight">
           Explore Missions & Workshops
         </h1>
-        <p className="text-slate-300 max-w-2xl text-base">
-          Browse our open-access catalog of week-wise coding workshops, live recorded lectures, and technical deep-dives.
+        <p className="text-slate-300 max-w-2xl text-base leading-relaxed">
+          Browse our open-access catalog of week-wise coding workshops, live recorded lectures, and technical deep-dives across deep-space computing domains.
         </p>
       </div>
 
-      {/* Filter and Search Bar */}
-      <div className="glass-panel rounded-2xl p-6 mb-10 space-y-6">
+      {/* Filter and Search HUD */}
+      <div className="glass-panel rounded-2xl p-6 space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
           {/* Search Box (6 cols) */}
           <div className="md:col-span-6 relative">
@@ -111,12 +111,13 @@ export const ExplorePage: React.FC = () => {
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Search by topic, keyword, or workshop name..."
-              className="w-full bg-[#0A1024]/80 border border-white/10 rounded-xl pl-11 pr-4 py-3 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-cosmic-cyan/60 font-sans"
+              className="w-full bg-[#070B16] border border-white/10 rounded-xl pl-11 pr-4 py-3 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-cosmic-cyan/60 font-sans"
             />
             {search && (
               <button
                 onClick={() => setSearch('')}
                 className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                aria-label="Clear search query"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -128,12 +129,12 @@ export const ExplorePage: React.FC = () => {
             <select
               value={selectedDifficulty}
               onChange={e => setSelectedDifficulty(e.target.value)}
-              className="w-full bg-[#0A1024]/80 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-cosmic-cyan/60 font-sans"
+              className="w-full bg-[#070B16] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-cosmic-cyan/60 font-sans"
             >
               <option value="">All Difficulty Levels</option>
-              <option value="Beginner">Beginner</option>
-              <option value="Intermediate">Intermediate</option>
-              <option value="Advanced">Advanced</option>
+              <option value="Beginner">Beginner Level</option>
+              <option value="Intermediate">Intermediate Level</option>
+              <option value="Advanced">Advanced Level</option>
             </select>
           </div>
 
@@ -142,7 +143,7 @@ export const ExplorePage: React.FC = () => {
             <select
               value={selectedSort}
               onChange={e => setSelectedSort(e.target.value)}
-              className="w-full bg-[#0A1024]/80 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-cosmic-cyan/60 font-sans"
+              className="w-full bg-[#070B16] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-cosmic-cyan/60 font-sans"
             >
               <option value="order">Curated Mission Order</option>
               <option value="recent">Recently Added</option>
@@ -157,7 +158,7 @@ export const ExplorePage: React.FC = () => {
             onClick={() => setSelectedPath('')}
             className={`px-3 py-1.5 rounded-lg text-xs font-mono shrink-0 transition-all ${
               selectedPath === ''
-                ? 'bg-cosmic-cyan/20 border border-cosmic-cyan text-cosmic-cyan font-bold'
+                ? 'bg-cosmic-cyan/20 border border-cosmic-cyan text-cosmic-cyan font-bold shadow-glow-cyan/20'
                 : 'glass-card text-slate-300 hover:text-white'
             }`}
           >
@@ -169,7 +170,7 @@ export const ExplorePage: React.FC = () => {
               onClick={() => setSelectedPath(path.slug)}
               className={`px-3 py-1.5 rounded-lg text-xs font-mono shrink-0 transition-all flex items-center gap-1.5 ${
                 selectedPath === path.slug
-                  ? 'bg-cosmic-cyan/20 border border-cosmic-cyan text-cosmic-cyan font-bold'
+                  ? 'bg-cosmic-cyan/20 border border-cosmic-cyan text-cosmic-cyan font-bold shadow-glow-cyan/20'
                   : 'glass-card text-slate-300 hover:text-white'
               }`}
             >
@@ -186,7 +187,7 @@ export const ExplorePage: React.FC = () => {
         {hasActiveFilters && (
           <div className="flex items-center justify-between pt-2 border-t border-white/5 text-xs font-mono text-slate-400">
             <div className="flex items-center gap-2 flex-wrap">
-              <span>Active Telemetry Filters:</span>
+              <span>ACTIVE TELEMETRY FILTERS:</span>
               {search && (
                 <span className="px-2 py-0.5 rounded bg-white/10 text-white">
                   Query: &quot;{search}&quot;
@@ -205,9 +206,9 @@ export const ExplorePage: React.FC = () => {
             </div>
             <button
               onClick={clearFilters}
-              className="text-rose-400 hover:text-rose-300 underline"
+              className="text-rose-400 hover:text-rose-300 underline cursor-pointer"
             >
-              Reset Filters
+              Reset All Filters
             </button>
           </div>
         )}
@@ -227,7 +228,7 @@ export const ExplorePage: React.FC = () => {
             <Filter className="w-8 h-8" />
           </div>
           <h3 className="text-xl font-space font-bold text-white">No Telemetry Matches Found</h3>
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-slate-400 leading-relaxed">
             No workshops currently match your search filters. Try adjusting your search query or selecting a different exploration zone.
           </p>
           <button
@@ -243,16 +244,17 @@ export const ExplorePage: React.FC = () => {
             <Link
               key={workshop.id}
               to={`/workshops/${workshop.slug}`}
-              onClick={() => soundManager.playTelemetryChirp(700, 0.05)}
+              onClick={() => soundManager.playTelemetryChirp(700, 0.04)}
               className="group glass-card rounded-2xl p-6 flex flex-col justify-between border border-white/5 hover:border-cosmic-cyan/40 transition-all"
             >
               <div>
                 <div className="flex items-center justify-between gap-2 mb-3">
-                  <span className="text-xs font-mono px-2.5 py-1 rounded bg-cosmic-cyan/10 border border-cosmic-cyan/30 text-cosmic-cyan">
+                  <span className="text-xs font-mono px-2.5 py-1 rounded bg-cosmic-cyan/10 border border-cosmic-cyan/30 text-cosmic-cyan font-semibold">
                     {workshop.difficulty}
                   </span>
-                  <span className="text-xs font-mono text-slate-400">
-                    {workshop.estimatedDuration || '4 Weeks'}
+                  <span className="text-xs font-mono text-slate-400 flex items-center gap-1">
+                    <Clock className="w-3.5 h-3.5" />
+                    <span>{workshop.estimatedDuration || '4 Weeks'}</span>
                   </span>
                 </div>
 
@@ -269,8 +271,8 @@ export const ExplorePage: React.FC = () => {
                 <span className="text-cosmic-violet font-semibold">
                   {workshop.learningPath?.title.split(':')[0] || 'Quazar Path'}
                 </span>
-                <span className="flex items-center gap-1 text-cosmic-cyan group-hover:translate-x-1 transition-transform">
-                  <span>Enter</span>
+                <span className="flex items-center gap-1 text-cosmic-cyan group-hover:translate-x-1.5 transition-transform">
+                  <span>Enter Workshop</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </span>
               </div>
