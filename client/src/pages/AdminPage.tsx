@@ -21,6 +21,7 @@ import {
   FileText,
   Tag,
   Link as LinkIcon,
+  Sparkles,
 } from 'lucide-react';
 import { api } from '../services/api';
 import {
@@ -76,6 +77,8 @@ export const AdminPage: React.FC = () => {
   const [isSessionModalOpen, setIsSessionModalOpen] = useState(false);
   const [editingSession, setEditingSession] = useState<Partial<Session> | null>(null);
   const [sessionPreviewId, setSessionPreviewId] = useState<string>('');
+
+  const [isSeeding, setIsSeeding] = useState(false);
 
   // Notification / Toast
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
@@ -333,6 +336,26 @@ export const AdminPage: React.FC = () => {
     }
   };
 
+  const handleSeedDemoData = async () => {
+    if (
+      !confirm(
+        'This will populate all default space learning paths (Planet C++, Binary Nebula, Cyber Orbit, AI Galaxy, Webverse) with demo workshops, weeks, and YouTube sessions. Continue?'
+      )
+    ) {
+      return;
+    }
+    try {
+      setIsSeeding(true);
+      const res = await api.seedDemoData();
+      showNotification('success', res.message || 'Demo curriculum and sessions restored successfully!');
+      await loadAllAdminData();
+    } catch (err: any) {
+      showNotification('error', err.message || 'Failed to seed demo curriculum');
+    } finally {
+      setIsSeeding(false);
+    }
+  };
+
   // Loading state during auth check
   if (authLoading) {
     return (
@@ -574,6 +597,27 @@ export const AdminPage: React.FC = () => {
             <p className="text-sm text-slate-300 leading-relaxed">
               To publish a recorded YouTube session: Navigate to <strong>Curriculum & Sessions</strong>, select the target workshop and week, click <strong>Add Session</strong>, paste the YouTube URL (video ID is extracted automatically), provide markdown notes, and toggle status to <strong>PUBLISHED</strong>. It will immediately be live on the public portal.
             </p>
+          </div>
+
+          {/* Quick Database & Demo Content Controls */}
+          <div className="glass-card rounded-2xl p-6 border border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <h4 className="font-space font-bold text-base text-white flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-cosmic-cyan" />
+                <span>Space Missions & Curriculum Demo Data</span>
+              </h4>
+              <p className="text-xs text-slate-400 mt-1">
+                Populate or restore all dummy learning paths (Planet C++, Binary Nebula, Cyber Orbit, AI Galaxy, Webverse), workshops, and YouTube sessions.
+              </p>
+            </div>
+            <button
+              onClick={handleSeedDemoData}
+              disabled={isSeeding}
+              className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-cosmic-violet to-cosmic-cyan text-white text-xs font-mono font-bold hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center gap-2 shrink-0 shadow-glow-cyan/30"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isSeeding ? 'animate-spin' : ''}`} />
+              <span>{isSeeding ? 'Restoring Curriculum...' : 'Restore Demo Curriculum'}</span>
+            </button>
           </div>
         </div>
       )}

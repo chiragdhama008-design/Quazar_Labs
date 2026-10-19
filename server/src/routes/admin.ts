@@ -562,4 +562,26 @@ router.put('/site-settings', async (req: AuthenticatedRequest, res: Response) =>
   }
 });
 
+// ==========================================
+// SEED / RESTORE DEMO DATA
+// ==========================================
+
+router.post('/seed-demo-data', async (_req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { seedDatabase } = await import('../seed.js');
+    await prisma.resource.deleteMany({});
+    await prisma.session.deleteMany({});
+    await prisma.week.deleteMany({});
+    await prisma.workshop.deleteMany({});
+    await prisma.learningPath.deleteMany({});
+    await prisma.siteSetting.deleteMany({});
+
+    await seedDatabase(prisma);
+    res.json({ success: true, message: 'All demo paths, workshops, and sessions successfully restored!' });
+  } catch (err: any) {
+    console.error('[Admin API] Error restoring demo data:', err);
+    res.status(500).json({ success: false, error: 'Failed to restore demo data' });
+  }
+});
+
 export default router;

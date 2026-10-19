@@ -9,7 +9,7 @@
     "dev:client": "npx vite --config client/vite.config.ts",
     "build:client": "npx vite build --config client/vite.config.ts",
     "build:server": "npx tsc -p tsconfig.server.json",
-    "build": "npm run build:client && npm run build:server",
+    "build": "npx prisma generate && npm run build:client && npm run build:server",
     "start": "node dist/server/server/src/index.js",
     "db:generate": "npx prisma generate",
     "db:seed": "npx tsx prisma/seed.ts",

@@ -44,6 +44,7 @@ function NotFoundPage() {
 }
 
 export function App() {
+  const [loading, setLoading] = useState(true);
   const [siteSettings, setSiteSettings] = useState<SiteSetting | null>(null);
 
   useEffect(() => {
@@ -56,8 +57,15 @@ export function App() {
     <BrowserRouter>
       <ScrollToTop />
 
-      {/* Global Interactive Procedural Starfield */}
-      <StarfieldCanvas isWarping={false} />
+      {/* Global Interactive Procedural Starfield (hyperspace warp during loading sequence) */}
+      <StarfieldCanvas isWarping={loading} />
+
+      {/* Animated Cosmic Initial Telemetry Sequence */}
+      <AnimatePresence>
+        {loading && (
+          <CosmicLoader onComplete={() => setLoading(false)} />
+        )}
+      </AnimatePresence>
 
       <div className="relative min-h-screen flex flex-col">
         {/* Navigation Bar */}

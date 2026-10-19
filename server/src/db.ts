@@ -1,8 +1,10 @@
 import { PrismaClient } from '@prisma/client';
 import { PGlite } from '@electric-sql/pglite';
 import { PrismaPGlite } from 'pglite-prisma-adapter';
+import { Pool } from 'pg';
 import path from 'path';
 import fs from 'fs';
+import { seedDatabase } from './seed.js';
 
 let prismaInstance: PrismaClient | null = null;
 
@@ -131,6 +133,27 @@ export async function getPrismaClient(): Promise<PrismaClient> {
 
   if (databaseUrl && (databaseUrl.startsWith('postgres://') || databaseUrl.startsWith('postgresql://'))) {
     console.log('[Database] Connecting to PostgreSQL database via connection string...');
+
+    // Auto-create/verify tables in PostgreSQL
+    try {
+      const isRenderOrCloud =
+        databaseUrl.includes('render.com') ||
+        databaseUrl.includes('dpg-') ||
+        databaseUrl.includes('neon.tech') ||
+        databaseUrl.includes('supabase.co');
+
+      const pool = new Pool({
+        connectionString: databaseUrl,
+        ssl: isRenderOrCloud ? { rejectUnauthorized: false } : undefined,
+      });
+
+      await pool.query(SCHEMA_DDL);
+      await pool.end();
+      console.log('[Database] Verified/created PostgreSQL tables successfully.');
+    } catch (ddlErr: any) {
+      console.warn('[Database] Notice: schema DDL execution encountered:', ddlErr.message || ddlErr);
+    }
+
     prismaInstance = new PrismaClient({
       datasourceUrl: databaseUrl,
     });
@@ -148,6 +171,20 @@ export async function getPrismaClient(): Promise<PrismaClient> {
     prismaInstance = new PrismaClient({ adapter });
     await prismaInstance.$connect();
     console.log('[Database] Connected to embedded persistent PostgreSQL successfully.');
+  }
+
+  // Automatic self-seeding: ensure dummy sessions and learning paths exist if DB is fresh
+  try {
+    const count = await prismaInstance.learningPath.count();
+    if (count === 0) {
+      console.log('[Database] No learning paths found. Auto-seeding initial space curriculum and dummy sessions...');
+      await seedDatabase(prismaInstance);
+      console.log('[Database] Auto-seeding completed successfully.');
+    } else {
+      console.log(`[Database] Database already populated with ${count} learning path(s).`);
+    }
+  } catch (seedErr: any) {
+    console.warn('[Database] Auto-seed check notice:', seedErr.message || seedErr);
   }
 
   return prismaInstance;

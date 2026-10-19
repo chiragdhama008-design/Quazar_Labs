@@ -169,4 +169,10 @@ export const api = {
       method: 'PUT',
       body: JSON.stringify(settings),
     }),
+
+  // Seed / Reset Demo Data
+  seedDemoData: () =>
+    request<{ success: boolean; message: string }>('/admin/seed-demo-data', {
+      method: 'POST',
+    }),
 };
