@@ -6,14 +6,14 @@
   "scripts": {
     "dev": "concurrently -n \"SERVER,CLIENT\" -c \"magenta,cyan\" \"npm run dev:server\" \"npm run dev:client\"",
     "dev:server": "tsx watch server/src/index.ts",
-    "dev:client": "vite --config client/vite.config.ts",
-    "build:client": "vite build --config client/vite.config.ts",
-    "build:server": "tsc -p tsconfig.server.json",
+    "dev:client": "npx vite --config client/vite.config.ts",
+    "build:client": "npx vite build --config client/vite.config.ts",
+    "build:server": "npx tsc -p tsconfig.server.json",
     "build": "npm run build:client && npm run build:server",
     "start": "node dist/server/server/src/index.js",
-    "db:generate": "prisma generate",
-    "db:seed": "tsx prisma/seed.ts",
-    "test": "vitest run"
+    "db:generate": "npx prisma generate",
+    "db:seed": "npx tsx prisma/seed.ts",
+    "test": "npx vitest run"
   },
   "repository": {
     "type": "git",

@@ -12,7 +12,7 @@ services:
     runtime: node
     plan: starter
     region: oregon
-    buildCommand: npm install --legacy-peer-deps --include=dev && npm run build
+    buildCommand: npm install --legacy-peer-deps --include=dev && npx prisma generate && npm run build
     preDeployCommand: npx tsx prisma/seed.ts
     startCommand: npm start
     envVars:
