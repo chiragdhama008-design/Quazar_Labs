@@ -15,12 +15,7 @@ async function bootstrap() {
     const app = createApp();
 
     const server = app.listen(PORT, HOST, () => {
-      console.log(`===================================================`);
-      console.log(`🚀 QUAZAR LABS MISSION CONTROL ONLINE`);
-      console.log(`📡 Listening on http://${HOST}:${PORT}`);
-      console.log(`🌌 Environment: ${process.env.NODE_ENV || 'development'}`);
-      console.log(`🔒 Command Station: /dharma (Admin Portal)`);
-      console.log(`===================================================`);
+      console.log(`[Quazar Labs] Server listening on http://${HOST}:${PORT} (${process.env.NODE_ENV || 'development'})`);
     });
 
     const shutdown = async (signal: string) => {

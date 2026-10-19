@@ -161,13 +161,7 @@ export const CosmicLoader: React.FC<CosmicLoaderProps> = ({ onComplete }) => {
         </div>
       </div>
 
-      {/* Polite Skip Button */}
-      <button
-        onClick={onComplete}
-        className="absolute bottom-8 px-4 py-1.5 rounded-full border border-white/10 text-xs font-mono text-slate-400 hover:text-white hover:border-cosmic-cyan/40 transition-colors z-20"
-      >
-        [ SKIP SEQUENCE ]
-      </button>
+
     </motion.div>
   );
 };

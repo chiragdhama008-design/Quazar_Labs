@@ -44,13 +44,6 @@ function NotFoundPage() {
 }
 
 export function App() {
-  const [hasLoaded, setHasLoaded] = useState<boolean>(() => {
-    if (typeof window !== 'undefined') {
-      return sessionStorage.getItem('quazar_universe_entered') === 'true';
-    }
-    return false;
-  });
-
   const [siteSettings, setSiteSettings] = useState<SiteSetting | null>(null);
 
   useEffect(() => {
@@ -59,27 +52,15 @@ export function App() {
       .catch(console.error);
   }, []);
 
-  const handleLoaderComplete = () => {
-    setHasLoaded(true);
-    if (typeof window !== 'undefined') {
-      sessionStorage.setItem('quazar_universe_entered', 'true');
-    }
-  };
-
   return (
     <BrowserRouter>
       <ScrollToTop />
 
       {/* Global Interactive Procedural Starfield */}
-      <StarfieldCanvas isWarping={!hasLoaded} />
-
-      {/* Cinematic Initial Intro Sequence */}
-      <AnimatePresence>
-        {!hasLoaded && <CosmicLoader onComplete={handleLoaderComplete} />}
-      </AnimatePresence>
+      <StarfieldCanvas isWarping={false} />
 
       <div className="relative min-h-screen flex flex-col">
-        {/* Navigation Bar (hidden only on admin route if desired, or styled nicely) */}
+        {/* Navigation Bar */}
         <Navbar />
 
         {/* Main Content View */}

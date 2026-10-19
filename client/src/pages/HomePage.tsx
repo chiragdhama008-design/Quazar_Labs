@@ -157,26 +157,6 @@ export const HomePage: React.FC = () => {
               </a>
             </motion.div>
 
-            {/* Telemetry quick counters */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
-              className="grid grid-cols-3 gap-4 pt-6 border-t border-white/10 max-w-lg mx-auto lg:mx-0"
-            >
-              <div>
-                <p className="font-space text-2xl font-bold text-white">100%</p>
-                <p className="font-mono text-xs text-slate-400">Hands-on Code</p>
-              </div>
-              <div>
-                <p className="font-space text-2xl font-bold text-cosmic-cyan">NPTEL</p>
-                <p className="font-mono text-xs text-slate-400">Weekly Structure</p>
-              </div>
-              <div>
-                <p className="font-space text-2xl font-bold text-cosmic-violet">Zero</p>
-                <p className="font-mono text-xs text-slate-400">Public Paywalls</p>
-              </div>
-            </motion.div>
           </div>
 
           {/* Hero Visual: Majestic Planetary Centerpiece (5 cols) */}
@@ -503,7 +483,7 @@ export const HomePage: React.FC = () => {
               <div className="flex items-start gap-3">
                 <CheckCircle2 className="w-5 h-5 text-cosmic-cyan shrink-0 mt-0.5" />
                 <p className="text-sm text-slate-300">
-                  <strong className="text-white">Structured Rigor:</strong> NPTEL-style weekly curricula with clear session objectives and downloadable resources.
+                  <strong className="text-white">Structured Rigor:</strong> Comprehensive weekly curricula with clear session objectives and downloadable resources.
                 </p>
               </div>
               <div className="flex items-start gap-3">
