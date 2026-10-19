@@ -1,0 +1,44 @@
+# Render Blueprint Configuration for Quazar Labs
+# Deploys: Single Node.js Web Service + Managed PostgreSQL Database
+
+version: "1"
+
+services:
+  # ========================================================
+  # Quazar Labs Web Service (Frontend + Backend Express API)
+  # ========================================================
+  - type: web
+    name: quazar-labs
+    runtime: node
+    plan: starter
+    region: oregon
+    buildCommand: npm install --legacy-peer-deps && npm run build
+    preDeployCommand: npx tsx prisma/seed.ts
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: ADMIN_USERNAME
+        sync: false
+        # Configure in Render Dashboard (e.g. quazar_commander)
+      - key: ADMIN_PASSWORD
+        sync: false
+        # Configure in Render Dashboard (e.g. DeepSpace2026!QuazarStation)
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: quazar-db
+          property: connectionString
+
+databases:
+  # ========================================================
+  # Render Managed PostgreSQL Database
+  # ========================================================
+  - name: quazar-db
+    plan: starter
+    region: oregon
+    databaseName: quazar_labs
+    user: quazar_user

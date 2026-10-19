@@ -1,0 +1,140 @@
+// Prisma schema for Quazar Labs
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum PublicationStatus {
+  DRAFT
+  PUBLISHED
+}
+
+model LearningPath {
+  id                 String            @id @default(cuid())
+  title              String
+  slug               String            @unique
+  description        String
+  learningObjectives String?
+  planetTheme        String            @default("purple-gas-giant") // e.g. blue-terrestrial, purple-gas-giant, cyber-ringed, nebula-red
+  accentColor        String            @default("#8B5CF6")
+  coverImageUrl      String?
+  featured           Boolean           @default(false)
+  publicationStatus  PublicationStatus @default(DRAFT)
+  displayOrder       Int               @default(0)
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  workshops          Workshop[]
+
+  @@index([publicationStatus])
+  @@index([displayOrder])
+}
+
+model Workshop {
+  id                 String            @id @default(cuid())
+  learningPathId     String
+  learningPath       LearningPath      @relation(fields: [learningPathId], references: [id], onDelete: Cascade)
+  title              String
+  slug               String            @unique
+  description        String
+  learningObjectives String?
+  difficulty         String            @default("Beginner") // Beginner, Intermediate, Advanced
+  estimatedDuration  String?           @default("4 Weeks")
+  thumbnailUrl       String?
+  publicationStatus  PublicationStatus @default(DRAFT)
+  displayOrder       Int               @default(0)
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  weeks              Week[]
+
+  @@index([learningPathId])
+  @@index([publicationStatus])
+  @@index([displayOrder])
+}
+
+model Week {
+  id                 String            @id @default(cuid())
+  workshopId         String
+  workshop           Workshop          @relation(fields: [workshopId], references: [id], onDelete: Cascade)
+  weekNumber         Int
+  title              String
+  description        String?
+  displayOrder       Int               @default(0)
+  publicationStatus  PublicationStatus @default(PUBLISHED)
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  sessions           Session[]
+
+  @@index([workshopId])
+  @@index([displayOrder])
+}
+
+model Session {
+  id                 String            @id @default(cuid())
+  weekId             String
+  week               Week              @relation(fields: [weekId], references: [id], onDelete: Cascade)
+  title              String
+  description        String?
+  youtubeUrl         String
+  youtubeVideoId     String
+  thumbnailUrl       String?
+  duration           String?
+  lessonNotes        String?           // Markdown lesson summary
+  topics             String?           // Comma-separated or JSON list of topics
+  publicationStatus  PublicationStatus @default(PUBLISHED)
+  displayOrder       Int               @default(0)
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  resources          Resource[]
+
+  @@index([weekId])
+  @@index([publicationStatus])
+  @@index([displayOrder])
+}
+
+model Resource {
+  id                 String            @id @default(cuid())
+  sessionId          String?
+  session            Session?          @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  title              String
+  url                String
+  resourceType       String            @default("LINK") // DOCUMENT, CODE, SLIDES, LINK, OTHER
+  description        String?
+  displayOrder       Int               @default(0)
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  @@index([sessionId])
+}
+
+model SiteSetting {
+  id                 String            @id @default("default")
+  heroHeading        String            @default("Your Next Mission Starts Here.")
+  heroSubtitle       String            @default("Explore the universe of technology with hands-on coding workshops, live mission-critical sessions, and deep-space software engineering.")
+  aboutText          String            @default("Quazar Labs is an immersive technology education venture crafting next-generation developers, engineers, and creators through real-world experimentation, orbital workshops, and deep-space coding challenges.")
+  contactEmail       String            @default("missions@quazarlabs.space")
+  githubUrl          String            @default("https://github.com/quazar-labs")
+  discordUrl         String            @default("https://discord.gg/quazarlabs")
+  youtubeUrl         String            @default("https://youtube.com/@quazarlabs")
+  footerText         String            @default("Crafted for cosmos explorers. Knowledge beyond orbit.")
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+}
+
+model AdminSession {
+  id                 String            @id // Secure session token
+  username           String
+  expiresAt          DateTime
+  createdAt          DateTime          @default(now())
+  lastActiveAt       DateTime          @default(now())
+
+  @@index([expiresAt])
+}
